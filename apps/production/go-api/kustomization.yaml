@@ -13,4 +13,4 @@ commonLabels:
 
 images:
 - name: fr-mei-tcr.tencentcloudcr.com/go-api/go-api
-  newTag: latest
+  newTag: b5eba10
