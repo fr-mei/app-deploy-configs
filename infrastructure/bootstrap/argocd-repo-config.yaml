@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-repo-creds
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  url: https://github.com/fr-mei/app-deploy-configs.git
+  username: git
+  password: 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

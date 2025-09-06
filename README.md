@@ -8,11 +8,19 @@
 app-deploy-configs/
 ├── apps/                      # 应用配置目录
 │   ├── production/            # 生产环境配置
-│   │   └── nginx/             # Nginx应用
+│   │   └── go-api/            # Go API应用
 │   │       ├── deployment.yaml
 │   │       ├── service.yaml
+│   │       ├── configmap.yaml
 │   │       └── kustomization.yaml
 │   └── staging/              # 预发环境配置
+├── infrastructure/           # 基础设施配置
+│   ├── bootstrap/           # ArgoCD和基础服务配置
+│   │   ├── tcr-secret.yaml        # TCR镜像仓库访问凭据
+│   │   ├── argocd-repo-config.yaml # GitHub仓库访问配置
+│   │   ├── go-api-app.yaml        # go-api应用定义
+│   │   └── kustomization.yaml     # 基础设施资源清单
+│   └── bootstrap-app.yaml   # 引导应用定义
 └── common/                   # 共享配置和资源
     └── namespaces/           # 命名空间定义
 ```
@@ -35,10 +43,29 @@ app-deploy-configs/
 
 ## GitOps工作流
 
+### 应用部署流程
 1. 开发人员编写应用代码并推送到应用源码仓库
 2. CI管道构建应用镜像并推送到容器镜像仓库
-3. 开发人员更新此仓库中的配置清单，引用新的镜像版本
+3. CI管道自动更新 `apps/` 目录中的配置清单，引用新的镜像版本
 4. Argo CD检测到配置变更，自动将应用部署到Kubernetes集群
+
+### 基础设施部署流程
+1. 管理员修改 `infrastructure/` 目录中的基础设施配置
+2. 提交并推送更改到此仓库
+3. Argo CD自动同步基础设施配置到集群
+
+### 初始化步骤
+1. K8s集群搭建完成并安装ArgoCD后，执行以下命令进行一次性引导：
+   ```bash
+   # 将引导应用文件传输到主节点
+   scp -i <SSH_KEY_PATH> infrastructure/bootstrap-app.yaml <SSH_USER>@<MASTER_IP>:~/
+   
+   # 登录主节点并应用引导配置
+   ssh -i <SSH_KEY_PATH> <SSH_USER>@<MASTER_IP>
+   kubectl apply -f ~/bootstrap-app.yaml
+   ```
+
+2. 后续所有配置更改只需提交到Git仓库，ArgoCD会自动同步
 
 ## 最佳实践
 
