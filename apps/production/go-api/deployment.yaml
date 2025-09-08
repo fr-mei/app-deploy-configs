@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: go-api
-        image: fr-mei-tcr.tencentcloudcr.com/go-api/go-api:latest
+        image: sgccr.ccs.tencentyun.com/go-api/go-api:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
