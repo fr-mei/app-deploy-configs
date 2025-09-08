@@ -7,5 +7,5 @@ metadata:
     argocd.argoproj.io/secret-type: repository
 stringData:
   url: https://github.com/fr-mei/app-deploy-configs.git
-  username: git
+  username: fr-mei
   password: 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
