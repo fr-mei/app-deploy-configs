@@ -13,4 +13,4 @@ commonLabels:
 
 images:
 - name: sgccr.ccs.tencentyun.com/go-api/go-api
-  newTag: b5eba10
+  newTag: latest
