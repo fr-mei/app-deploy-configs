@@ -12,5 +12,5 @@ commonLabels:
   managed-by: argocd
 
 images:
-- name: fr-mei-tcr.tencentcloudcr.com/go-api/go-api
+- name: sgccr.ccs.tencentyun.com/go-api/go-api
   newTag: b5eba10
