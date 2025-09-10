@@ -73,3 +73,34 @@ app-deploy-configs/
 - 使用kustomization.yaml组织相关资源
 - 将敏感信息存储在Kubernetes Secrets中，不要直接提交到Git仓库
 - 为不同环境创建独立的目录（如production、staging）
+
+## go-api
+
+### 1. 通过Service的ClusterIP访问（集群内部）
+```
+# 获取Service的ClusterIP
+kubectl get svc go-api -n default
+
+# 使用ClusterIP访问
+curl http://<cluster-ip>:80/api/endpoint
+```
+### 2. 通过NodePort访问（外部访问）
+您的Service类型为LoadBalancer，腾讯云会自动创建公网负载均衡器。获取公网IP：
+```
+kubectl get svc go-api -n default -o wide
+```
+在输出中找到EXTERNAL-IP字段，使用该IP访问：
+```
+curl http://<external-ip>:80/api/endpoint
+```
+### 3. 通过Ingress访问（推荐）
+如果配置了Ingress，可以使用域名访问：
+
+```bash
+curl http://your-domain.com/api/endpoint
+```
+### 4. 端口转发临时访问
+```bash
+kubectl port-forward svc/go-api 8080:80
+```
+在本地浏览器访问：http://localhost:8080
