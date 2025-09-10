@@ -11,7 +11,6 @@ spec:
     repoURL: https://github.com/fr-mei/app-deploy-configs.git
     path: apps/production/go-api
     targetRevision: master
-    kustomize: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: default
