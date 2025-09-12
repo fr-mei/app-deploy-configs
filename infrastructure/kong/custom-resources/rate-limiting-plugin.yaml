@@ -1,0 +1,11 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: rate-limiting
+  namespace: default
+config:
+  minute: 100
+  policy: local
+  fault_tolerant: true
+  hide_client_headers: false
+plugin: rate-limiting
