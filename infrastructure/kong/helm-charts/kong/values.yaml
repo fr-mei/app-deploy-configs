@@ -1,140 +1,142 @@
 # Kong API Gateway Helm Values
+# 由于使用了Chart依赖，需要将所有配置放在kong key下
 
-# 命名配置
-nameOverride: "kong"
-fullnameOverride: "kong"
+kong:
+  # 命名配置
+  nameOverride: "kong"
+  fullnameOverride: "kong"
 
-# Kong数据库配置 - 使用无数据库模式简化部署
-env:
-  database: "off"  # 无数据库模式
-  
-# Kong配置
-image:
-  repository: kong
-  tag: "3.6"  # 使用最新的3.6版本
-  pullPolicy: IfNotPresent
-
-# Kong Ingress Controller配置
-ingressController:
-  enabled: true
-  installCRDs: false  # CRDs已在脚本中单独安装
+  # Kong数据库配置 - 使用无数据库模式简化部署
+  env:
+    database: "off"  # 无数据库模式
+    
+  # Kong配置
   image:
-    repository: kong/kubernetes-ingress-controller
-    tag: "3.0"
-  # 添加资源限制以确保控制器能正确调度
+    repository: kong
+    tag: "3.6"  # 使用最新的3.6版本
+    pullPolicy: IfNotPresent
+
+  # Kong Ingress Controller配置
+  ingressController:
+    enabled: true
+    installCRDs: false  # CRDs已在脚本中单独安装
+    image:
+      repository: kong/kubernetes-ingress-controller
+      tag: "3.0"
+    # 添加资源限制以确保控制器能正确调度
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+    # 环境变量配置 - 适用于腾讯云没有CCM的环境
+    env:
+      publish_service: kong/kong-proxy  # 修正为正确的服务名
+      skip_post_start: "false"
+      update_status: "true"
+    ingressClass: kong  # 设置默认的IngressClass名称
+    ingressClassAnnotations:
+      ingressclass.kubernetes.io/is-default-class: "true"
+
+  # 代理配置
+  proxy:
+    enabled: true
+    type: NodePort  # 对于无CCM的腾讯云环境，使用NodePort
+    http:
+      enabled: true
+      servicePort: 80
+      containerPort: 8000
+      nodePort: 30090  # 指定固定端口，便于访问
+    tls:
+      enabled: true
+      servicePort: 443
+      containerPort: 8443
+      nodePort: 30453  # HTTPS端口
+
+  # Admin API配置
+  admin:
+    enabled: true
+    type: NodePort
+    http:
+      enabled: true
+      nodePort: 30001
+    tls:
+      enabled: false  # 简化开发环境配置
+
+  # 健康检查和监控配置
+  status:
+    enabled: true
+    http:
+      enabled: true
+
+  # 资源配置 - 针对中小型集群优化
   resources:
-    limits:
+    requests:
       cpu: 100m
       memory: 256Mi
-    requests:
-      cpu: 50m
-      memory: 128Mi
-  # 环境变量配置 - 适用于腾讯云没有CCM的环境
-  env:
-    publish_service: kong/kong-proxy  # 修正为正确的服务名
-    skip_post_start: "false"
-    update_status: "true"
-  ingressClass: kong  # 设置默认的IngressClass名称
-  ingressClassAnnotations:
-    ingressclass.kubernetes.io/is-default-class: "true"
+    limits:
+      cpu: 1000m
+      memory: 512Mi
 
-# 代理配置
-proxy:
-  enabled: true
-  type: NodePort  # 对于无CCM的腾讯云环境，使用NodePort
-  http:
-    enabled: true
-    servicePort: 80
-    containerPort: 8000
-    nodePort: 30090  # 指定固定端口，便于访问
-  tls:
-    enabled: true
-    servicePort: 443
-    containerPort: 8443
-    nodePort: 30453  # HTTPS端口
+  # 探针配置
+  readinessProbe:
+    httpGet:
+      path: /status
+      port: status
+      scheme: HTTP
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
 
-# Admin API配置
-admin:
-  enabled: true
-  type: NodePort
-  http:
-    enabled: true
-    nodePort: 30001
-  tls:
-    enabled: false  # 简化开发环境配置
+  livenessProbe:
+    httpGet:
+      path: /status
+      port: status
+      scheme: HTTP
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
 
-# 健康检查和监控配置
-status:
-  enabled: true
-  http:
-    enabled: true
+  # 自动伸缩配置
+  autoscaling:
+    enabled: false  # 开发环境禁用自动伸缩
 
-# 资源配置 - 针对中小型集群优化
-resources:
-  requests:
-    cpu: 100m
-    memory: 256Mi
-  limits:
-    cpu: 1000m
-    memory: 512Mi
+  # 持久化存储 - 无数据库模式不需要
+  postgresql:
+    enabled: false
 
-# 探针配置
-readinessProbe:
-  httpGet:
-    path: /status
-    port: status
-    scheme: HTTP
-  initialDelaySeconds: 15
-  timeoutSeconds: 5
-  periodSeconds: 10
-  successThreshold: 1
-  failureThreshold: 3
+  # RBAC配置
+  rbac:
+    create: true
 
-livenessProbe:
-  httpGet:
-    path: /status
-    port: status
-    scheme: HTTP
-  initialDelaySeconds: 30
-  timeoutSeconds: 5
-  periodSeconds: 10
-  successThreshold: 1
-  failureThreshold: 3
+  serviceAccount:
+    create: true
+    name: kong
 
-# 自动伸缩配置
-autoscaling:
-  enabled: false  # 开发环境禁用自动伸缩
+  # 优化安全上下文
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 1000
 
-# 持久化存储 - 无数据库模式不需要
-postgresql:
-  enabled: false
+  # 基本插件启用
+  plugins:
+    configMaps:
+    - name: kong-plugin-defaults
+      pluginName: cors
+      data:
+        origins: '*'
+        headers: '*'
+        exposed_headers: '*'
+        methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+        max_age: 3600
 
-# RBAC配置
-rbac:
-  create: true
-
-serviceAccount:
-  create: true
-  name: kong
-
-# 优化安全上下文
-securityContext:
-  runAsUser: 1000
-  fsGroup: 1000
-
-# 基本插件启用
-plugins:
-  configMaps:
-  - name: kong-plugin-defaults
-    pluginName: cors
-    data:
-      origins: '*'
-      headers: '*'
-      exposed_headers: '*'
-      methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
-      max_age: 3600
-
-# 节点亲和性配置
-nodeSelector: {}
-tolerations: []
-affinity: {}
+  # 节点亲和性配置
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
