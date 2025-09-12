@@ -29,26 +29,26 @@ ingressController:
     requests:
       cpu: 50m
       memory: 128Mi
-  # 环境变量配置
+  # 环境变量配置 - 适用于腾讯云没有CCM的环境
   env:
-    publish_service: kong/kong-helm-kong-proxy  # 指定发布服务名称
+    publish_service: kong/kong-helm-kong-proxy
+    skip_post_start: "false"
+    update_status: "true"
 
 # 代理配置
 proxy:
   enabled: true
-  type: NodePort
+  type: NodePort  # 对于无CCM的腾讯云环境，使用NodePort
   http:
     enabled: true
     servicePort: 80
     containerPort: 8000
-    # 修改为不与ArgoCD冲突的端口
-    nodePort: 30090
+    nodePort: 30090  # 指定固定端口，便于访问
   tls:
     enabled: true
     servicePort: 443
     containerPort: 8443
-    # Set a nodePort which is available if service type is NodePort
-    nodePort: 30453
+    nodePort: 30453  # HTTPS端口
 
 # Admin API配置
 admin:
