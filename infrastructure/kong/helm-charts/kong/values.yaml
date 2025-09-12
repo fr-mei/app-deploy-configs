@@ -38,6 +38,8 @@ ingressController:
 proxy:
   enabled: true
   type: NodePort
+  annotations: {}
+  loadBalancerClass: ""
   http:
     enabled: true
     servicePort: 80
