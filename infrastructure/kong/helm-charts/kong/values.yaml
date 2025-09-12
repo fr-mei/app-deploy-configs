@@ -29,17 +29,14 @@ ingressController:
     requests:
       cpu: 50m
       memory: 128Mi
-  # 环境变量配置 - 修复bare metal环境配置
+  # 环境变量配置
   env:
     publish_service: kong/kong-helm-kong-proxy  # 指定发布服务名称
-    publish_status_address_source: "service"    # 使用service地址而不是等待外部IP
 
 # 代理配置
 proxy:
   enabled: true
   type: NodePort
-  annotations: {}
-  loadBalancerClass: ""
   http:
     enabled: true
     servicePort: 80
