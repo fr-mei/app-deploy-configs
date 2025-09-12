@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/fr-mei/app-deploy-configs.git
-    path: infrastructure/kong/apps
+    path: infrastructure/kong/apps/production
     targetRevision: master
   destination:
     server: https://kubernetes.default.svc
