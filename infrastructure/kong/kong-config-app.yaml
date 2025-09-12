@@ -22,6 +22,3 @@ spec:
     - Validate=false
     - CreateNamespace=true
     - ApplyOutOfSyncOnly=true
-  # 确保先部署Kong Helm才部署配置
-  dependsOn:
-    - name: kong-helm
