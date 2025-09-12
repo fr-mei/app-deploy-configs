@@ -34,6 +34,9 @@ ingressController:
     publish_service: kong/kong-proxy  # 修正为正确的服务名
     skip_post_start: "false"
     update_status: "true"
+  ingressClass: kong  # 设置默认的IngressClass名称
+  ingressClassAnnotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
 
 # 代理配置
 proxy:

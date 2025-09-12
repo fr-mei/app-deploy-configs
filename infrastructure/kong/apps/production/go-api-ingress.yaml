@@ -5,10 +5,10 @@ metadata:
   namespace: default
   annotations:
     konghq.com/strip-path: "true"
-    kubernetes.io/ingress.class: "kong"
     konghq.com/protocols: "https,http"
     konghq.com/https-redirect-status-code: "301"
 spec:
+  ingressClassName: kong  # 使用现代的ingressClassName而不是注解
   rules:
   - http:
       paths:
