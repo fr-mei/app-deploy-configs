@@ -17,7 +17,7 @@ image:
 # Kong Ingress Controller配置
 ingressController:
   enabled: true
-  installCRDs: false  # 我们会单独安装CRDs
+  installCRDs: false  # CRDs已在脚本中单独安装
   image:
     repository: kong/kubernetes-ingress-controller
     tag: "3.0"
@@ -31,7 +31,7 @@ ingressController:
       memory: 128Mi
   # 环境变量配置 - 适用于腾讯云没有CCM的环境
   env:
-    publish_service: kong/kong-helm-kong-proxy
+    publish_service: kong/kong-proxy  # 修正为正确的服务名
     skip_post_start: "false"
     update_status: "true"
 
