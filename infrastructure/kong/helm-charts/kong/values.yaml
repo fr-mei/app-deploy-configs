@@ -1,0 +1,120 @@
+# Kong API Gateway Helm Values
+
+# 命名配置
+nameOverride: "kong"
+fullnameOverride: "kong"
+
+# Kong数据库配置 - 使用无数据库模式简化部署
+env:
+  database: "off"  # 无数据库模式
+  
+# Kong配置
+image:
+  repository: kong
+  tag: "3.6"  # 使用最新的3.6版本
+  pullPolicy: IfNotPresent
+
+# Kong Ingress Controller配置
+ingressController:
+  enabled: true
+  installCRDs: false  # 我们会单独安装CRDs
+  image:
+    repository: kong/kubernetes-ingress-controller
+    tag: "3.0"
+
+# 代理配置
+proxy:
+  enabled: true
+  type: NodePort
+  http:
+    enabled: true
+    nodePort: 30080
+  tls:
+    enabled: true
+    nodePort: 30443
+
+# Admin API配置
+admin:
+  enabled: true
+  type: NodePort
+  http:
+    enabled: true
+    nodePort: 30001
+  tls:
+    enabled: false  # 简化开发环境配置
+
+# 健康检查和监控配置
+status:
+  enabled: true
+  http:
+    enabled: true
+
+# 资源配置 - 针对中小型集群优化
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+# 探针配置
+readinessProbe:
+  httpGet:
+    path: /status
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 15
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /status
+    port: status
+    scheme: HTTP
+  initialDelaySeconds: 30
+  timeoutSeconds: 5
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+# 自动伸缩配置
+autoscaling:
+  enabled: false  # 开发环境禁用自动伸缩
+
+# 持久化存储 - 无数据库模式不需要
+postgresql:
+  enabled: false
+
+# RBAC配置
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+  name: kong
+
+# 优化安全上下文
+securityContext:
+  runAsUser: 1000
+  fsGroup: 1000
+
+# 基本插件启用
+plugins:
+  configMaps:
+  - name: kong-plugin-defaults
+    pluginName: cors
+    data:
+      origins: '*'
+      headers: '*'
+      exposed_headers: '*'
+      methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH'
+      max_age: 3600
+
+# 节点亲和性配置
+nodeSelector: {}
+tolerations: []
+affinity: {}

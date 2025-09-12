@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kong-config
+  name: kong-helm
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
@@ -9,8 +9,11 @@ spec:
   project: default
   source:
     repoURL: https://github.com/fr-mei/app-deploy-configs.git
-    path: infrastructure/kong
+    path: infrastructure/kong/helm-charts/kong
     targetRevision: master
+    helm:
+      valueFiles:
+      - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: kong
@@ -20,13 +23,9 @@ spec:
       selfHeal: true
     syncOptions:
     - CreateNamespace=true
-    - ApplyOutOfSyncOnly=true
-  ignoreDifferences:
-  - group: apps
-    kind: Deployment
-    jsonPointers:
-    - /status
-  - group: batch
-    kind: Job
-    jsonPointers:
-    - /status
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        maxDuration: 3m0s
+        factor: 2
