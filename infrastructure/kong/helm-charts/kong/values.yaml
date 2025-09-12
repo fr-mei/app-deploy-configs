@@ -48,7 +48,7 @@ proxy:
     servicePort: 443
     containerPort: 8443
     # Set a nodePort which is available if service type is NodePort
-    nodePort: 30443
+    nodePort: 30453
 
 # Admin API配置
 admin:
