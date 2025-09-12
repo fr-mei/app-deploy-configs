@@ -1,20 +1,5 @@
 # Kong API Gateway Helm Values
 
-# 强制使用NodePort - 防止被其他设置覆盖
-proxy:
-  enabled: true
-  type: NodePort  # 强制为NodePort类型
-  http:
-    enabled: true
-    servicePort: 80
-    containerPort: 8000
-    nodePort: 30090  # 指定固定端口，便于访问
-  tls:
-    enabled: true
-    servicePort: 443
-    containerPort: 8443
-    nodePort: 30453  # HTTPS端口
-
 # 命名配置
 nameOverride: "kong"
 fullnameOverride: "kong"
