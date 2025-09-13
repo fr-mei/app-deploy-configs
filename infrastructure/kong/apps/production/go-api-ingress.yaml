@@ -7,6 +7,9 @@ metadata:
     konghq.com/strip-path: "true"
     konghq.com/protocols: "https,http"
     konghq.com/https-redirect-status-code: "301"
+    kubernetes.io/ingress.class: "kong"
+    konghq.com/preserve-host: "false"
+    konghq.com/override: "kong-proxy-service"
 spec:
   ingressClassName: kong  # 使用现代的ingressClassName而不是注解
   rules:
